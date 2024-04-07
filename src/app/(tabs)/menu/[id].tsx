@@ -1,17 +1,97 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
-import { Stack, useLocalSearchParams } from 'expo-router'
+import { StyleSheet, Text, View, Image, Pressable } from "react-native";
+import React, { useState } from "react";
+import { Stack, useLocalSearchParams } from "expo-router";
+import products from "@assets/data/products";
+import Colors from "@/constants/Colors";
+import Button from "@/components/Button";
 
+export const defaulPizzaImage =
+  "https://notjustdev-dummy.s3.us-east-2.amazonaws.com/food/default.png";
+
+const sizes = ["S", "M", "L", "XL"];
 const ProductDetailItem = () => {
+  const [selectedSize, setSelectedSize] = useState("S");
   const { id } = useLocalSearchParams();
+
+  const product = products.find(
+    (product) => product.id.toString() === id.toString()
+  );
+
+  const addToCart = () => {
+    console.warn('item added')
+  }
+
+  if (!product) {
+    return <Text>Product is unavailable</Text>;
+  }
+
   return (
-    <View>
-      <Stack.Screen options={{ title:`Details: ${id}`}} />
-      <Text>ProductDetailItem : {id}</Text>
+    <View style={styles.container}>
+      <Stack.Screen options={{ title: product.name }} />
+      <Image
+        source={{ uri: product.image || defaulPizzaImage }}
+        style={styles.image}
+        resizeMode="contain"
+      />
+      <Text>Select size</Text>
+
+      <View style={styles.sizes}>
+        {sizes.map((size) => (
+          <Pressable
+            style={[
+              styles.size,
+              {
+                backgroundColor:
+                  selectedSize === size ? "lightblue" : "white",
+              },
+            ]}
+            key={size}
+            onPress={() => setSelectedSize(size)}
+          >
+            <Text style={styles.sizeText}>{size}</Text>
+          </Pressable>
+        ))}
+      </View>
+
+      <Text style={styles.price}>${product.price}</Text>
+      <Button onPress={addToCart} text='Add to Cart'/> 
     </View>
-  )
-}
+  );
+};
 
-export default ProductDetailItem
+export default ProductDetailItem;
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.light.background,
+    padding: 10
+  },
+  image: {
+    width: "100%",
+    aspectRatio: 1,
+  },
+  sizes: {
+    padding: 10,
+    flexDirection: "row",
+    justifyContent: "space-around",
+  },
+  size: {
+    height: 40,
+    width: 40,
+    backgroundColor: "gray",
+    padding: 10,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  sizeText: {
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  price: {
+    fontSize: 16,
+    color: Colors.light.tint,
+    marginTop: 'auto'
+  },
+});
